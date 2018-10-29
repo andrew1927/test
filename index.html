@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Avtoshop</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/ionicons@4.1.2/dist/ionicons.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <button @click="showAside = !showAside"><ion-icon name="menu"></ion-icon></button>
+        </header>
+        <transition name="slide">
+            <aside v-show="showAside">
+                <button @click="openUser">User</button>
+                <br>
+                <button @click="openAdmin">Admin</button>
+            </aside>
+        </transition>
+        <div class="content" >
+            <select v-model="selected" @change="sort(selected)" v-show="!showAdmin">
+                <option disabled value="">Выберите один из вариантов</option>
+                <option value="marka">Marka</option>
+                <option value="model">Model</option>
+                <option value="year">Year</option>
+            </select>
+            <table>
+                <thead>
+                    <th>Marka</th>
+                    <th>Model</th>
+                    <th>Year</th>
+                </thead>
+                <tr v-for="(item,index) in array">
+                    <td>{{item.marka}}</td>
+                    <td>{{item.model}}</td>
+                    <td>{{item.year}}</td>
+                    <td><button @click="deleteItem(index)" v-show="showAdmin">X</button></td>
+                </tr>
+            </table>
+            <label for="checkbox" v-show="!showAdmin"><input type="checkbox" id="checkbox" v-model="euro5" @change="filterByOldCars(euro5)">Cars under 5 years old</label>
+            <form @submit.prevent="addItem" v-show="showAdmin">
+                <label for="marka">Marka</label>
+                <input type="text" id="marka" v-model="currentItem.marka" placeholder="enter marka">
+                <label for="model">Model</label>
+                <input type="text" id="model" v-model="currentItem.model" placeholder="enter model">
+                <label for="year">Year</label>
+                <input type="text" id="year" v-model="currentItem.year" placeholder="enter year">
+                <button type="submit" >Add</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        var app = new Vue({
+            el: '#app',
+            computed: {
+               array: function(){
+                   return this.filterArr || this.arr;
+               }
+            },
+            data: {
+                showAdmin:false,
+                showAside: false,
+                selected: "",
+                currentItem: {
+                    marka: "",
+                    model: "",
+                    year: ""
+                },
+                euro5: false,
+                filterArr: null,
+                arr: [{
+                    marka: "Renualt",
+                    model: "Megan",
+                    year: 2013
+                },
+                {
+                    marka: "Fiat",
+                    model: "Doblo",
+                    year: 2011
+                },
+                {
+                    marka: "BMW",
+                    model: "X6",
+                    year: 2017
+                }]
+            },
+            methods: {
+                sort(selected){
+                    switch(selected){
+                        case "marka": this.array.sort(function (a, b) {
+                            return a.marka > b.marka;
+                        }); break;
+                        case "model": this.array.sort(function (a, b) {
+                            return a.model > b.model;
+                        }); break;
+                        case "year": this.array.sort(function (a, b) {
+                            return b.year - a.year;
+                        }); break;
+                    }
+                },
+                filterByOldCars(value){
+                   if(value){
+                       var computedYear = new Date().getFullYear()-5;
+                       this.filterArr = this.arr.filter(function (item) {
+                           return item.year >= computedYear;
+                       })
+                   } else {
+                       this.filterArr = null;
+                   }
+                },
+                addItem(){
+                    this.arr.push(this.currentItem);
+                    this.currentItem = {
+                        marka: "",
+                        model: "",
+                        year: ""
+                    };
+                },
+                deleteItem(index){
+                    this.arr.splice(index,1);
+                },
+                openAdmin(){
+                   this.showAdmin = true;
+                    this.showAside = false;
+                },
+                openUser(){
+                    this.showAdmin = false;
+                    this.showAside = false;
+                }
+            }
+        })
+    </script>
+</body>
+</html>
